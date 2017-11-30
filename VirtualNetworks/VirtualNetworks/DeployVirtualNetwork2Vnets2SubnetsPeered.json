@@ -351,6 +351,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-09-01",
       "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworks-VNET-001')]",
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksAddressSpace-VNET-002-ADDR-001')]",
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksDhcpOptions-VNET-002-DNS-001')]",
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksDhcpOptions-VNET-002-DNS-002')]",
