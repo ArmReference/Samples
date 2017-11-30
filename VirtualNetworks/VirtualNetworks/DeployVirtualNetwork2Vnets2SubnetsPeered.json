@@ -148,7 +148,7 @@
       }
     },
     {
-      "name": "BuildVirtualNetworksPeering-VNET-001-PPER-001",
+      "name": "BuildVirtualNetworksPeering-VNET-001-PEER-001",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-09-01",
       "dependsOn": [ ],
@@ -178,7 +178,7 @@
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksDhcpOptions-VNET-001-DNS-002')]",
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksSubnets-VNET-001-DMZ-001')]",
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksSubnets-VNET-001-APP-001')]",
-        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksPeering-VNET-001-PPER-001')]"
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksPeering-VNET-001-PEER-001')]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -206,7 +206,7 @@
             "value": "[createArray(reference('BuildVirtualNetworksSubnets-VNET-001-DMZ-001').outputs.subnet.value,reference('BuildVirtualNetworksSubnets-VNET-001-APP-001').outputs.subnet.value)]"
           },
           "virtualNetworkPeerings": {
-            "value": "[createArray(reference('BuildVirtualNetworksPeering-VNET-001-PPER-001').outputs.virtualNetworkPeerings.value)]"
+            "value": "[createArray(reference('BuildVirtualNetworksPeering-VNET-001-PEER-001').outputs.virtualNetworkPeerings.value)]"
           }
         }
       }
@@ -326,7 +326,7 @@
       }
     },
     {
-      "name": "BuildVirtualNetworksPeering-VNET-002-PPER-001",
+      "name": "BuildVirtualNetworksPeering-VNET-002-PEER-001",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-09-01",
       "dependsOn": [ ],
@@ -356,7 +356,7 @@
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksDhcpOptions-VNET-002-DNS-002')]",
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksSubnets-VNET-002-DMZ-001')]",
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksSubnets-VNET-002-APP-001')]",
-        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksPeering-VNET-002-PPER-001')]"
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksPeering-VNET-002-PEER-001')]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -384,7 +384,7 @@
             "value": "[createArray(reference('BuildVirtualNetworksSubnets-VNET-002-DMZ-001').outputs.subnet.value,reference('BuildVirtualNetworksSubnets-VNET-002-APP-001').outputs.subnet.value)]"
           },
           "virtualNetworkPeerings": {
-            "value": "[createArray(reference('BuildVirtualNetworksPeering-VNET-002-PPER-001').outputs.virtualNetworkPeerings.value)]"
+            "value": "[createArray(reference('BuildVirtualNetworksPeering-VNET-002-PEER-001').outputs.virtualNetworkPeerings.value)]"
           }
         }
       }
