@@ -1,0 +1,359 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "StorageAccountName": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "ContainerName": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "SasToken": {
+      "type": "string",
+      "defaultValue": ""
+    }
+  },
+  "variables": {
+    "VnetName-001": "VNET-A",
+    "AddressSpace-001": "172.16.192.0/22",
+    "DnsServers-001": [
+      "172.16.192.1",
+      "172.16.192.2"
+    ],
+    "VnetName-002": "VNET-B",
+    "AddressSpace-002": "10.10.192.0/22",
+    "DnsServers-002": [
+      "10.10.192.1",
+      "10.10.192.2"
+    ],
+    "Provider": "/Microsoft.Network",
+    "Resource": "/virtualNetworks",
+    "templateUri": "[concat('https://',parameters('StorageAccountName'),'.blob.core.windows.net/',parameters('ContainerName'),variables('Provider'),variables('Resource'))]"
+  },
+  "resources": [
+    {
+      "name": "BuildVirtualNetworksSubnets-VNET-001-DMZ-001",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateUri'), '/subnet.json', parameters('SasToken'))]",
+          "contentVersion": "2017.09.01.0"
+        },
+        "parameters": {
+          "Name": {
+            "value": "[concat(variables('VnetName-001'),'-DMZ-001')]"
+          },
+          "AddressPrefix": {
+            "value": "172.16.192.0/24"
+          },
+          "NetworkSecurityGroupId": {
+            "value": ""
+          },
+          "RouteTableId": {
+            "value": ""
+          },
+          "ServiceEndpointId": {
+            "value": [ ]
+          }
+        }
+      }
+    },
+    {
+      "name": "BuildVirtualNetworksSubnets-VNET-001-APP-001",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateUri'), '/subnet.json', parameters('SasToken'))]",
+          "contentVersion": "2017.09.01.0"
+        },
+        "parameters": {
+          "Name": {
+            "value": "[concat(variables('VnetName-001'),'-APP-001')]"
+          },
+          "AddressPrefix": {
+            "value": "172.16.193.0/24"
+          },
+          "NetworkSecurityGroupId": {
+            "value": ""
+          },
+          "RouteTableId": {
+            "value": ""
+          },
+          "ServiceEndpointId": {
+            "value": [ ]
+          }
+        }
+      }
+    },
+    {
+      "name": "BuildVirtualNetworksDhcpOptions-VNET-001-DNS-001",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateUri'), '/dhcpOptions.json', parameters('SasToken'))]",
+          "contentVersion": "2017.09.01.0"
+        },
+        "parameters": {
+          "DnsServers": {
+            "value": "[variables('DnsServers-001')[0]]"
+          }
+        }
+      }
+    },
+    {
+      "name": "BuildVirtualNetworksDhcpOptions-VNET-001-DNS-002",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateUri'), '/dhcpOptions.json', parameters('SasToken'))]",
+          "contentVersion": "2017.09.01.0"
+        },
+        "parameters": {
+          "DnsServers": {
+            "value": "[variables('DnsServers-001')[1]]"
+          }
+        }
+      }
+    },
+    {
+      "name": "BuildVirtualNetworksAddressSpace-VNET-001-ADDR-001",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateUri'), '/addressSpace.json', parameters('SasToken'))]",
+          "contentVersion": "2017.09.01.0"
+        },
+        "parameters": {
+          "AddressPrefixes": {
+            "value": "[variables('AddressSpace-001')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "BuildVirtualNetworks-VNET-001",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksAddressSpace-VNET-001-ADDR-001')]",
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksDhcpOptions-VNET-001-DNS-001')]",
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksDhcpOptions-VNET-001-DNS-002')]",
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksSubnets-VNET-001-DMZ-001')]",
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksSubnets-VNET-001-APP-001')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateUri'), '/virtualNetworks.json', parameters('SasToken'))]",
+          "contentVersion": "2017.09.01.0"
+        },
+        "parameters": {
+          "Name": {
+            "value": "[concat(variables('VnetName-001'),'-001')]"
+          },
+          "addressSpace": {
+            "value": "[createArray(reference('BuildVirtualNetworksAddressSpace-VNET-001-ADDR-001').outputs.addressPrefixes.value)]"
+          },
+          "dhcpOptions": {
+            "value": "[createArray(reference('BuildVirtualNetworksDhcpOptions-VNET-001-DNS-001').outputs.dnsServers.value,reference('BuildVirtualNetworksDhcpOptions-VNET-001-DNS-002').outputs.dnsServers.value)]"
+          },
+          "enableDdosProtection": {
+            "value": false
+          },
+          "enableVmProtection": {
+            "value": false
+          },
+          "subnets": {
+            "value": "[createArray(reference('BuildVirtualNetworksSubnets-VNET-001-DMZ-001').outputs.subnet.value,reference('BuildVirtualNetworksSubnets-VNET-001-APP-001').outputs.subnet.value)]"
+          },
+          "virtualNetworkPeerings": {
+            "value": [ ]
+          }
+        }
+      }
+    },
+    {
+      "name": "BuildVirtualNetworksSubnets-VNET-002-DMZ-001",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateUri'), '/subnet.json', parameters('SasToken'))]",
+          "contentVersion": "2017.09.01.0"
+        },
+        "parameters": {
+          "Name": {
+            "value": "[concat(variables('VnetName-002'),'-DMZ-001')]"
+          },
+          "AddressPrefix": {
+            "value": "10.10.192.0/24"
+          },
+          "NetworkSecurityGroupId": {
+            "value": ""
+          },
+          "RouteTableId": {
+            "value": ""
+          },
+          "ServiceEndpointId": {
+            "value": [ ]
+          }
+        }
+      }
+    },
+    {
+      "name": "BuildVirtualNetworksSubnets-VNET-002-APP-001",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateUri'), '/subnet.json', parameters('SasToken'))]",
+          "contentVersion": "2017.09.01.0"
+        },
+        "parameters": {
+          "Name": {
+            "value": "[concat(variables('VnetName-002'),'-APP-001')]"
+          },
+          "AddressPrefix": {
+            "value": "10.10.193.0/24"
+          },
+          "NetworkSecurityGroupId": {
+            "value": ""
+          },
+          "RouteTableId": {
+            "value": ""
+          },
+          "ServiceEndpointId": {
+            "value": [ ]
+          }
+        }
+      }
+    },
+    {
+      "name": "BuildVirtualNetworksDhcpOptions-VNET-002-DNS-001",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateUri'), '/dhcpOptions.json', parameters('SasToken'))]",
+          "contentVersion": "2017.09.01.0"
+        },
+        "parameters": {
+          "DnsServers": {
+            "value": "[variables('DnsServers-002')[0]]"
+          }
+        }
+      }
+    },
+    {
+      "name": "BuildVirtualNetworksDhcpOptions-VNET-002-DNS-002",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateUri'), '/dhcpOptions.json', parameters('SasToken'))]",
+          "contentVersion": "2017.09.01.0"
+        },
+        "parameters": {
+          "DnsServers": {
+            "value": "[variables('DnsServers-002')[1]]"
+          }
+        }
+      }
+    },
+    {
+      "name": "BuildVirtualNetworksAddressSpace-VNET-002-ADDR-001",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateUri'), '/addressSpace.json', parameters('SasToken'))]",
+          "contentVersion": "2017.09.01.0"
+        },
+        "parameters": {
+          "AddressPrefixes": {
+            "value": "[variables('AddressSpace-002')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "BuildVirtualNetworks-VNET-002",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksAddressSpace-VNET-002-ADDR-001')]",
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksDhcpOptions-VNET-002-DNS-001')]",
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksDhcpOptions-VNET-002-DNS-002')]",
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksSubnets-VNET-002-DMZ-001')]",
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksSubnets-VNET-002-APP-001')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateUri'), '/virtualNetworks.json', parameters('SasToken'))]",
+          "contentVersion": "2017.09.01.0"
+        },
+        "parameters": {
+          "Name": {
+            "value": "[concat(variables('VnetName-002'),'-001')]"
+          },
+          "addressSpace": {
+            "value": "[createArray(reference('BuildVirtualNetworksAddressSpace-VNET-002-ADDR-001').outputs.addressPrefixes.value)]"
+          },
+          "dhcpOptions": {
+            "value": "[createArray(reference('BuildVirtualNetworksDhcpOptions-VNET-002-DNS-001').outputs.dnsServers.value,reference('BuildVirtualNetworksDhcpOptions-VNET-002-DNS-002').outputs.dnsServers.value)]"
+          },
+          "enableDdosProtection": {
+            "value": false
+          },
+          "enableVmProtection": {
+            "value": false
+          },
+          "subnets": {
+            "value": "[createArray(reference('BuildVirtualNetworksSubnets-VNET-002-DMZ-001').outputs.subnet.value,reference('BuildVirtualNetworksSubnets-VNET-002-APP-001').outputs.subnet.value)]"
+          },
+          "virtualNetworkPeerings": {
+            "value": [ ]
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "virtualNetworks-VNET-001": {
+      "type": "object",
+      "value": "[reference('BuildVirtualNetworks-VNET-001').outputs.virtualNetworks.value]"
+    },
+    "virtualNetworks-VNET-002": {
+      "type": "object",
+      "value": "[reference('BuildVirtualNetworks-VNET-002').outputs.virtualNetworks.value]"
+    }
+  }
+}
