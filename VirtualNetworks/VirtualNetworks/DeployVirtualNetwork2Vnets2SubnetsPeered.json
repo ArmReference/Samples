@@ -148,27 +148,6 @@
       }
     },
     {
-      "name": "BuildVirtualNetworksPeering-VNET-001-PEER-001",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-09-01",
-      "dependsOn": [ ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(variables('templateUri'), '/virtualNetworkPeerings.json', parameters('SasToken'))]",
-          "contentVersion": "2017.09.01.0"
-        },
-        "parameters": {
-          "Name": {
-            "value": "[concat(variables('VnetName-001'),'-PEER-001')]"
-          },
-          "RemoteVirtualNetworkId": {
-            "value": "[concat(subscription().id,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/virtualNetworks/',variables('VnetName-002'),'-001')]"
-          }
-        }
-      }
-    },
-    {
       "name": "BuildVirtualNetworks-VNET-001",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-09-01",
@@ -177,8 +156,7 @@
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksDhcpOptions-VNET-001-DNS-001')]",
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksDhcpOptions-VNET-001-DNS-002')]",
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksSubnets-VNET-001-DMZ-001')]",
-        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksSubnets-VNET-001-APP-001')]",
-        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksPeering-VNET-001-PEER-001')]"
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksSubnets-VNET-001-APP-001')]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -204,9 +182,6 @@
           },
           "subnets": {
             "value": "[createArray(reference('BuildVirtualNetworksSubnets-VNET-001-DMZ-001').outputs.subnet.value,reference('BuildVirtualNetworksSubnets-VNET-001-APP-001').outputs.subnet.value)]"
-          },
-          "virtualNetworkPeerings": {
-            "value": "[createArray(reference('BuildVirtualNetworksPeering-VNET-001-PEER-001').outputs.virtualNetworkPeerings.value)]"
           }
         }
       }
@@ -326,38 +301,15 @@
       }
     },
     {
-      "name": "BuildVirtualNetworksPeering-VNET-002-PEER-001",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-09-01",
-      "dependsOn": [ ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(variables('templateUri'), '/virtualNetworkPeerings.json', parameters('SasToken'))]",
-          "contentVersion": "2017.09.01.0"
-        },
-        "parameters": {
-          "Name": {
-            "value": "[concat(variables('VnetName-002'),'-PEER-001')]"
-          },
-          "RemoteVirtualNetworkId": {
-            "value": "[concat(subscription().id,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/virtualNetworks/',variables('VnetName-001'),'-001')]"
-          }
-        }
-      }
-    },
-    {
       "name": "BuildVirtualNetworks-VNET-002",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-09-01",
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworks-VNET-001')]",
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksAddressSpace-VNET-002-ADDR-001')]",
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksDhcpOptions-VNET-002-DNS-001')]",
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksDhcpOptions-VNET-002-DNS-002')]",
         "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksSubnets-VNET-002-DMZ-001')]",
-        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksSubnets-VNET-002-APP-001')]",
-        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksPeering-VNET-002-PEER-001')]"
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworksSubnets-VNET-002-APP-001')]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -383,9 +335,52 @@
           },
           "subnets": {
             "value": "[createArray(reference('BuildVirtualNetworksSubnets-VNET-002-DMZ-001').outputs.subnet.value,reference('BuildVirtualNetworksSubnets-VNET-002-APP-001').outputs.subnet.value)]"
+          }
+        }
+      }
+    },
+    {
+      "name": "BuildVirtualNetworksPeering-VNET-001-PEER-001",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworks-VNET-002')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateUri'), '/virtualNetworkPeerings.json', parameters('SasToken'))]",
+          "contentVersion": "2017.09.01.0"
+        },
+        "parameters": {
+          "Name": {
+            "value": "[concat(variables('VnetName-001'),'-001/',variables('VnetName-001'),'-PEER-001')]"
           },
-          "virtualNetworkPeerings": {
-            "value": "[createArray(reference('BuildVirtualNetworksPeering-VNET-002-PEER-001').outputs.virtualNetworkPeerings.value)]"
+          "RemoteVirtualNetworkId": {
+            "value": "[concat(subscription().id,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/virtualNetworks/',variables('VnetName-002'),'-001')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "BuildVirtualNetworksPeering-VNET-002-PEER-001",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/','BuildVirtualNetworks-VNET-001')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateUri'), '/virtualNetworkPeerings.json', parameters('SasToken'))]",
+          "contentVersion": "2017.09.01.0"
+        },
+        "parameters": {
+          "Name": {
+            "value": "[concat(variables('VnetName-002'),'-001/',variables('VnetName-002'),'-PEER-001')]"
+          },
+          "RemoteVirtualNetworkId": {
+            "value": "[concat(subscription().id,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/virtualNetworks/',variables('VnetName-001'),'-001')]"
           }
         }
       }
